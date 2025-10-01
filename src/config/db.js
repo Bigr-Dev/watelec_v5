@@ -1,0 +1,66 @@
+import { SQLiteProvider } from 'expo-sqlite'
+
+export async function migrateDbIfNeeded(db) {
+  await db.execAsync(`
+    PRAGMA journal_mode = WAL;
+    CREATE TABLE IF NOT EXISTS queued_items (
+      id TEXT PRIMARY KEY,
+      kind TEXT NOT NULL,            -- 'reading' | 'install'
+      payload TEXT NOT NULL,         -- JSON string
+      status TEXT NOT NULL,          -- 'pending' | 'failed' | 'ok'
+      tries INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER NOT NULL,   -- epoch ms
+      updated_at INTEGER NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_queued_items_status ON queued_items(status);
+    CREATE INDEX IF NOT EXISTS idx_queued_items_created ON queued_items(created_at);
+  `)
+}
+
+// import * as SQLite from 'expo-sqlite'
+// export const db = SQLite.openDatabase('watelec.db')
+
+// // Call once on app start
+// export function initDb() {
+//   db.transaction((tx) => {
+//     tx.executeSql('PRAGMA foreign_keys = ON;')
+
+//     // Pending queue (offline-first)
+//     tx.executeSql(`
+//       CREATE TABLE IF NOT EXISTS queued_readings (
+//         id INTEGER PRIMARY KEY AUTOINCREMENT,
+//         role TEXT NOT NULL,               -- 'inspector' | 'installer'
+//         clientRef TEXT NOT NULL,
+//         meterNumber TEXT NOT NULL,
+//         readingValue REAL,                -- nullable for installer pre-photo
+//         readingDate TEXT,                 -- ISO string
+//         readingTime TEXT,                 -- ISO string or HH:mm
+//         imageUri TEXT,                    -- file:// path to image
+//         imageUri2 TEXT,                   -- installer only
+//         imageUri3 TEXT,                   -- installer only
+//         payload TEXT,                     -- optional JSON for future fields
+//         createdAt TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+//         lastError TEXT
+//       );
+//     `)
+
+//     // Success log (for your “reports / logs” tab)
+//     tx.executeSql(`
+//       CREATE TABLE IF NOT EXISTS successful_readings (
+//         id INTEGER PRIMARY KEY AUTOINCREMENT,
+//         role TEXT NOT NULL,
+//         clientRef TEXT NOT NULL,
+//         meterNumber TEXT NOT NULL,
+//         readingValue REAL,
+//         readingDate TEXT,
+//         readingTime TEXT,
+//         imageUri TEXT,
+//         imageUri2 TEXT,
+//         imageUri3 TEXT,
+//         serverResponse TEXT,             -- JSON from server
+//         createdAt TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+//       );
+//     `)
+//   })
+// }
