@@ -6,8 +6,7 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
-    "preinstall": "node -e \"const fs=require('fs');const pj=JSON.parse(fs.readFileSync('package.json','utf8'));console.log('\\n=== DEBUG on EAS ===');console.log('react-dom dep:', pj.dependencies?.['react-dom']||pj.devDependencies?.['react-dom']||'NO'); try{const pl=JSON.parse(fs.readFileSync('package-lock.json','utf8'));console.log('lock root react-dom:', pl.packages?.['']?.dependencies?.['react-dom']||'NO');}catch(e){console.log('no package-lock?');} console.log('====================\\n');\""
+    "web": "expo start --web"
   },
   "dependencies": {
     "@expo/metro-runtime": "^6.1.2",
@@ -36,7 +35,9 @@
   "devDependencies": {
     "@babel/core": "^7.28.4",
     "babel-preset-expo": "^54.0.3",
-    "react-refresh": "^0.17.0"
+    "react-dom": "^19.2.0",
+    "react-refresh": "^0.17.0",
+    "scheduler": "^0.27.0"
   },
   "private": true,
   "engines": {
