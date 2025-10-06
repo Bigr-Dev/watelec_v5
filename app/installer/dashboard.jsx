@@ -116,6 +116,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#c7d4de',
     height: 52,
+    color: '#333',
   },
   pickerContainer: {
     borderWidth: 1,
