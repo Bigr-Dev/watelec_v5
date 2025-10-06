@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 // expo
 import { useRouter } from 'expo-router'
+import AntDesign from '@expo/vector-icons/AntDesign'
 
 // context
 import { useAuth } from '../context/auth/context'
@@ -40,6 +41,7 @@ const SigninScreen = ({ subtitle }) => {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordVisible, setPasswordVisible] = useState(false)
 
   const submit = async () => {
     await handleLogin({ email, password })
@@ -93,22 +95,63 @@ const SigninScreen = ({ subtitle }) => {
                   <Text style={styles.appTitle}>LOGIN</Text>
                 </View>
                 <View style={{ width: '100%', marginBottom: 20 }}>
+                  <Text
+                    style={{
+                      marginBottom: 5,
+                      marginLeft: 5,
+                      color: '#333',
+                      fontWeight: 'semibold',
+                    }}
+                  >
+                    Email
+                  </Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { marginBottom: 20 }]}
                     placeholder="Email"
                     value={email}
                     onChangeText={setEmail}
                     placeholderTextColor={'#999'}
+                    textContentType="emailAddress"
                   />
 
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholderTextColor={'#999'}
-                    secureTextEntry
-                  />
+                  <Text
+                    style={{
+                      marginBottom: 5,
+                      marginLeft: 5,
+                      color: '#333',
+                      fontWeight: 'semibold',
+                    }}
+                  >
+                    Password
+                  </Text>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={[styles.input, { width: '90%' }]}
+                      placeholder="Password"
+                      value={password}
+                      onChangeText={setPassword}
+                      placeholderTextColor={'#999'}
+                      secureTextEntry={!passwordVisible}
+                      textContentType="password"
+                    />
+                    <View style={{ width: '10%' }}>
+                      {passwordVisible ? (
+                        <AntDesign
+                          name="eye"
+                          onPress={() => setPasswordVisible(false)}
+                          color={'#0088CC'}
+                          size={18}
+                        />
+                      ) : (
+                        <AntDesign
+                          name="eye-invisible"
+                          onPress={() => setPasswordVisible(true)}
+                          color={'#1e95c9'}
+                          size={18}
+                        />
+                      )}
+                    </View>
+                  </View>
                 </View>
                 <View style={{ width: '100%' }}>
                   <GradientButton
@@ -153,11 +196,25 @@ const SigninScreen = ({ subtitle }) => {
 export default SigninScreen
 
 const styles = StyleSheet.create({
+  inputContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F5F5F5',
+    // padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+
+    fontSize: 16,
+    width: '100%',
+    color: '#333',
+  },
   input: {
     backgroundColor: '#F5F5F5',
     padding: 15,
     borderRadius: 10,
-    marginBottom: 20,
+    // marginBottom: 20,
 
     fontSize: 16,
     width: '100%',

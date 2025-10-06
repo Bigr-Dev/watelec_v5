@@ -132,12 +132,21 @@ const Details = () => {
               marginTop: 24,
             }}
           >
-            <GradientButton
+            {/* <GradientButton
               title="Save"
               onPress={save}
               style={{ minWidth: '50%' }}
-            />
-            <GradientButton title="Retry Upload" onPress={doRetry} />
+            /> */}
+            {item?.status !== 'ok' && (
+              <GradientButton
+                title="Retry Upload"
+                style={{ width: '100%' }}
+                onPress={() => {
+                  save()
+                  doRetry()
+                }}
+              />
+            )}
           </View>
         </View>
         <GradientButton

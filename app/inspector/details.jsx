@@ -23,7 +23,7 @@ const Details = () => {
     return items?.find((x) => (x.id || `ts_${x.createdAt}`) === id)
   }, [items, id])
   const it = item?.payload ?? item
-
+  console.log('item :>> ', item)
   const [meterNumber, setMeterNumber] = useState(String(it?.meterNumber ?? ''))
   const [readingValue, setReadingValue] = useState(
     it?.readingValue != null ? String(it.readingValue) : ''
@@ -106,12 +106,21 @@ const Details = () => {
               marginTop: 24,
             }}
           >
-            <GradientButton
+            {/* <GradientButton
               title="Save"
               onPress={save}
               style={{ minWidth: '50%' }}
-            />
-            <GradientButton title="Retry Upload" onPress={doRetry} />
+            /> */}
+            {item?.status !== 'ok' && (
+              <GradientButton
+                title="Retry Upload"
+                style={{ width: '100%' }}
+                onPress={() => {
+                  save()
+                  doRetry()
+                }}
+              />
+            )}
           </View>
 
           <View style={{ height: 8 }} />

@@ -35,13 +35,10 @@
   "devDependencies": {
     "@babel/core": "^7.28.4",
     "babel-preset-expo": "^54.0.3",
-    "react-dom": "^19.2.0",
+    "react-dom": "19.1.0",
     "react-refresh": "^0.17.0",
     "scheduler": "^0.27.0"
   },
   "private": true,
-  "engines": {
-    "node": ">=18 <21"
-  },
   "packageManager": "npm@10.7.0"
 }

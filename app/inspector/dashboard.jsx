@@ -159,5 +159,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     // maxWidth: '80%',
   },
-  picker: { height: 52 },
+  picker: { height: 52, color: '#333' },
 })

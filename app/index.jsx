@@ -78,10 +78,11 @@ const Index = () => {
       <View style={styles.content}>
         <View style={styles.cardsContainer}>
           <DashboardCard title={`INSTALLER`} href={'installer'}>
-            <AntDesign name="user" size={38} color="white" />
+            <AntDesign name="user-add" size={38} color="white" />
           </DashboardCard>
           <DashboardCard title="INSPECTOR" href={'inspector'}>
-            <Octicons name="meter" size={38} color="white" />
+            {/* <Octicons name="meter" size={38} color="white" /> */}
+            <AntDesign name="user" size={38} color="white" />
           </DashboardCard>
         </View>
       </View>

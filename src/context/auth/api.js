@@ -1,6 +1,7 @@
 import * as actions from './actions'
 
 import { LOGIN_URL } from '../../config/env'
+import { Alert } from 'react-native'
 
 // fetch current user
 export const fetchCurrentUser = async ({
@@ -28,10 +29,16 @@ export const fetchCurrentUser = async ({
     })
     const result = await r.json()
 
-    if (!result)
-      authDispatch(actions.loginFailure('login failed, please try again later'))
-    if (result.success === false)
-      authDispatch(actions.loginFailure('login failed:', result.Message))
+    if (!result.Success) {
+      Alert.alert('login failed:', result.Message)
+      return authDispatch(
+        actions.loginFailure('login failed, please try again later')
+      )
+    }
+    if (result.Success === false) {
+      Alert.alert('login failed:', result.Message)
+      return authDispatch(actions.loginFailure('login failed:', result.Message))
+    }
 
     const userData = {
       role: role,
