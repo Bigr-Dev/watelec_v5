@@ -1,22 +1,24 @@
-import { Alert, Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+// app/inspector/camera.jsx
+
+// react
 import { useCallback, useRef } from 'react'
-import { useInspector } from '../../src/context/inspectors/context'
+import { Alert, Image, StyleSheet, TouchableOpacity, View } from 'react-native'
+
+// expo
 import { CameraView } from 'expo-camera'
 import AntDesign from '@expo/vector-icons/AntDesign'
 import { useFocusEffect, useRouter } from 'expo-router'
-import { useAuth } from '../../src/context/auth/context'
-//import { makeThumbnail } from '../../src/utils/makeThumbnail'
-//import * as ImageManipulator from 'expo-image-manipulator'
 
-// dimensions
-const squareSize = 228
-const cornerLength = 20
-const cornerThickness = 3
+// context
+import { useInspector } from '../../src/context/inspectors/context'
+
+// components
+import FocusBox from '../../src/components/focus-box'
 
 const Camera = () => {
-  const { back, replace } = useRouter()
-  const { cameraPermission } = useAuth()
-  const { taking, setTaking, setThumbUri, setUri } = useInspector()
+  const { replace, push } = useRouter()
+
+  const { taking, setTaking, setUri } = useInspector()
 
   const cameraRef = useRef(null)
   const activeRef = useRef(false)
@@ -39,21 +41,15 @@ const Camera = () => {
         base64: false,
         skipProcessing: true,
       })
-      // const thumb = await makeThumbnail(photo.uri)
-      setUri(photo.uri)
-      // setThumbUri?.(thumb)
 
-      replace({
-        pathname: '/inspector/confirm',
-      })
+      setUri(photo.uri)
+
+      push('/inspector/confirm')
     } catch (err) {
       Alert.alert('Camera error', String(err?.message || err))
     } finally {
       setTaking(false)
     }
-  }
-  if (!cameraPermission) {
-    return <View style={{ flex: 1, backgroundColor: 'black' }} />
   }
 
   return (
@@ -65,26 +61,8 @@ const Camera = () => {
         autofocus="on"
         enableHighQualityPhotos
       />
-      <View style={styles.overlay}>
-        <View style={styles.focusSquare}>
-          <View style={[styles.corner, styles.topLeft]}>
-            <View style={styles.lineH} />
-            <View style={styles.lineV} />
-          </View>
-          <View style={[styles.corner, styles.topRight]}>
-            <View style={styles.lineH} />
-            <View style={styles.lineV} />
-          </View>
-          <View style={[styles.corner, styles.bottomLeft]}>
-            <View style={styles.lineH} />
-            <View style={styles.lineV} />
-          </View>
-          <View style={[styles.corner, styles.bottomRight]}>
-            <View style={styles.lineH} />
-            <View style={styles.lineV} />
-          </View>
-        </View>
-      </View>
+
+      <FocusBox />
 
       <View style={styles.layer}>
         <View style={styles.topBar}>
@@ -132,29 +110,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  focusSquare: { width: squareSize, height: squareSize, position: 'relative' },
-  corner: { position: 'absolute', width: cornerLength, height: cornerLength },
-  lineH: {
-    position: 'absolute',
-    height: cornerThickness,
-    width: cornerLength,
-    backgroundColor: '#fff',
-  },
-  lineV: {
-    position: 'absolute',
-    width: cornerThickness,
-    height: cornerLength,
-    backgroundColor: '#fff',
-  },
-  topLeft: { top: 0, left: 0 },
-  topRight: { top: 0, right: 0, transform: [{ rotate: '90deg' }] },
-  bottomLeft: { bottom: 0, left: 0, transform: [{ rotate: '-90deg' }] },
-  bottomRight: { bottom: 0, right: 0, transform: [{ rotate: '180deg' }] },
   layer: {
     position: 'absolute',
     top: 0,

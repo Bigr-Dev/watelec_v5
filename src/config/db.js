@@ -1,22 +1,58 @@
 import { SQLiteProvider } from 'expo-sqlite'
 
 export async function migrateDbIfNeeded(db) {
+  await db.execAsync(`PRAGMA journal_mode = WAL;`)
+
+  // 1) Ensure base table exists (original shape)
   await db.execAsync(`
-    PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS queued_items (
       id TEXT PRIMARY KEY,
-      kind TEXT NOT NULL,            -- 'reading' | 'install'
+      kind TEXT NOT NULL,            -- 'reading' | 'install' (legacy)
       payload TEXT NOT NULL,         -- JSON string
       status TEXT NOT NULL,          -- 'pending' | 'failed' | 'ok'
       tries INTEGER NOT NULL DEFAULT 0,
       created_at INTEGER NOT NULL,   -- epoch ms
       updated_at INTEGER NOT NULL
     );
+  `)
 
+  // 2) Add role column if it doesn't exist
+  const columns = await db.getAllAsync(`PRAGMA table_info(queued_items);`)
+  const hasRole = columns?.some((c) => c.name === 'role')
+
+  if (!hasRole) {
+    // Nullable for backward compatibility
+    await db.execAsync(`ALTER TABLE queued_items ADD COLUMN role TEXT;`)
+  }
+
+  // 3) Create helpful indexes (id is already PK)
+  await db.execAsync(`
     CREATE INDEX IF NOT EXISTS idx_queued_items_status ON queued_items(status);
     CREATE INDEX IF NOT EXISTS idx_queued_items_created ON queued_items(created_at);
+    CREATE INDEX IF NOT EXISTS idx_queued_items_role ON queued_items(role);
+    -- Optional composite to speed screens like "reports by role + status + recency"
+    CREATE INDEX IF NOT EXISTS idx_queued_items_role_status_created
+      ON queued_items(role, status, created_at);
   `)
 }
+
+// export async function migrateDbIfNeeded(db) {
+//   await db.execAsync(`
+//     PRAGMA journal_mode = WAL;
+//     CREATE TABLE IF NOT EXISTS queued_items (
+//       id TEXT PRIMARY KEY,
+//       kind TEXT NOT NULL,            -- 'reading' | 'install'
+//       payload TEXT NOT NULL,         -- JSON string
+//       status TEXT NOT NULL,          -- 'pending' | 'failed' | 'ok'
+//       tries INTEGER NOT NULL DEFAULT 0,
+//       created_at INTEGER NOT NULL,   -- epoch ms
+//       updated_at INTEGER NOT NULL
+//     );
+
+//     CREATE INDEX IF NOT EXISTS idx_queued_items_status ON queued_items(status);
+//     CREATE INDEX IF NOT EXISTS idx_queued_items_created ON queued_items(created_at);
+//   `)
+// }
 
 // import * as SQLite from 'expo-sqlite'
 // export const db = SQLite.openDatabase('watelec.db')

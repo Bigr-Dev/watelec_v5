@@ -1,12 +1,22 @@
+// app/inspector/confirm.jsx
+
+// react
 import { Alert, Image, StyleSheet, Text, View } from 'react-native'
 
-import ScreenContainer from '../../src/components/screen-container'
+// expo
 import { useRouter } from 'expo-router'
+
+// context
 import { useInspector } from '../../src/context/inspectors/context'
-import GradientButton from '../../src/components/GradientButton'
 import { useQueue } from '../../src/context/QueueContext'
+
+// components
+import ScreenContainer from '../../src/components/screen-container'
+import GradientButton from '../../src/components/GradientButton'
+
+// utils
 import { trySaveToGalleryAsync } from '../../src/utils/photo-storage'
-import { makeThumbnail } from '../../src/utils/makeThumbnail'
+import { readingDateISO, readingTimeISO, now } from '../../src/utils/helpers'
 
 const Confirm = () => {
   const { replace } = useRouter()
@@ -17,7 +27,6 @@ const Confirm = () => {
     meterNumber,
     reading,
     handleUpload,
-    thumbUri,
     setMeterNumber,
     setReading,
     setUri,
@@ -25,30 +34,12 @@ const Confirm = () => {
     setThumbUri,
   } = useInspector()
 
-  const now = new Date()
-  // midnight date-only ISO for ReadingDate
-  const readingDateISO = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  ).toISOString()
-  const readingTimeISO = now.toISOString()
-
   const submit = async () => {
     try {
       if (uri) {
         await trySaveToGalleryAsync(uri)
-        // const thumb = await makeThumbnail(uri)
-        // console.log('thumb :>> ', thumb)
-        // setThumbUri?.(thumb)
       }
-      // console.log('thumb :>> ', thumb)
       await handleUpload()
-
-      // if (uri !== null) {
-      //     const thumb = await makeThumbnail(uri)
-      //     setThumbUri?.(thumb)
-      //   }
 
       await enqueue({
         id: `${Date.now()}`,
@@ -62,7 +53,6 @@ const Confirm = () => {
           readingDateISO,
           readingTimeISO,
           photoUri: uri,
-          // thumbUri: thumbUri ?? null,
         },
       })
 
@@ -73,8 +63,6 @@ const Confirm = () => {
       setThumbUri(null)
       replace('/inspector/reports')
     } catch (e) {
-      // Queue a lightweight payload using URI, not base64
-      // console.log('thumb :>> ', thumb)
       await enqueue({
         id: `${Date.now()}`,
         role: 'inspector',
@@ -87,7 +75,6 @@ const Confirm = () => {
           readingDateISO,
           readingTimeISO,
           photoUri: uri,
-          //    thumbUri: thumbUri ?? null,
         },
       })
 
@@ -98,6 +85,7 @@ const Confirm = () => {
       replace('/inspector/reports')
     }
   }
+
   return (
     <ScreenContainer>
       <View style={{ flex: 1, padding: 16 }}>

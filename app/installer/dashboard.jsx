@@ -71,6 +71,7 @@ const Dashboard = () => {
           value={newMeterNumber}
           onChangeText={setNewMeterNumber}
           keyboardType="number-pad"
+          placeholderTextColor={'#333'}
         />
         <GradientButton
           title="SUBMIT METER READING"

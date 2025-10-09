@@ -1,3 +1,7 @@
+// app/installer/confirm.jsx
+
+// react
+import { useState } from 'react'
 import {
   Alert,
   Image,
@@ -7,24 +11,26 @@ import {
   View,
 } from 'react-native'
 
-import ScreenContainer from '../../src/components/screen-container'
+// expo
 import { useRouter } from 'expo-router'
 
-import GradientButton from '../../src/components/GradientButton'
-import { useQueue } from '../../src/context/QueueContext'
-import { trySaveToGalleryAsync } from '../../src/utils/photo-storage'
-import { makeThumbnail } from '../../src/utils/makeThumbnail'
+// context
 import { useInstaller } from '../../src/context/installers/context'
-import { useState } from 'react'
+import { useQueue } from '../../src/context/QueueContext'
+
+// components
+import ScreenContainer from '../../src/components/screen-container'
+import GradientButton from '../../src/components/GradientButton'
+
+// utils
+import { trySaveToGalleryAsync } from '../../src/utils/photo-storage'
+import { readingDateISO, readingTimeISO, now } from '../../src/utils/helpers'
 
 const Confirm = () => {
   const { replace } = useRouter()
   const q = useQueue() || {}
   const enqueue = q.enqueue || (async () => {})
   const {
-    ClientReferences,
-    installer,
-    installerDispatch,
     selectedClientRef,
     setSelectedClientRef,
     newMeterNumber,
@@ -32,34 +38,16 @@ const Confirm = () => {
     reading,
     setReading,
     uris,
-    // uri,
-    // meterNumber,
-    // reading,
-    // handleUpload,
-    // thumbUri,
-    // setMeterNumber,
-    // setReading,
-    // setUri,
-    // setTaking,
-    // setThumbUri,
+    setUris,
+    setTaking,
   } = useInstaller()
 
   const [selectedPic, setSelectedPic] = useState(uris[0] || null)
 
-  const now = new Date()
-  const readingDateISO = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  ).toISOString()
-  const readingTimeISO = now.toISOString()
-
   const submit = async () => {
     try {
-      if (uris) {
-        uris.forEach(async (u) => {
-          await trySaveToGalleryAsync(u)
-        })
+      if (uris?.length) {
+        await Promise.all(uris.map((u) => trySaveToGalleryAsync(u)))
       }
 
       await enqueue({
@@ -98,7 +86,6 @@ const Confirm = () => {
           readingTimeISO,
           photoUris: uris,
           clientRef: selectedClientRef,
-          // thumbUri: thumbUri ?? null,
         },
       })
       Alert.alert(

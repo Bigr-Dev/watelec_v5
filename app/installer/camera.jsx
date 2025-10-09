@@ -1,38 +1,31 @@
-import { useFocusEffect, useRouter } from 'expo-router'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { useAuth } from '../../src/context/auth/context'
-import { useInstaller } from '../../src/context/installers/context'
-import { useCallback, useEffect, useRef } from 'react'
-import AntDesign from '@expo/vector-icons/AntDesign'
-import { CameraView } from 'expo-camera'
+// app/installer/camera.jsx
 
-// dimensions
-const squareSize = 228
-const cornerLength = 20
-const cornerThickness = 3
+// react
+import { useCallback, useRef } from 'react'
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+
+// expo
+import { CameraView } from 'expo-camera'
+import AntDesign from '@expo/vector-icons/AntDesign'
+import { useFocusEffect, useRouter } from 'expo-router'
+
+// context
+import { useInstaller } from '../../src/context/installers/context'
+
+// components
+import FocusBox from '../../src/components/focus-box'
 
 const Camera = () => {
-  const { back, replace, push } = useRouter()
-  const { cameraPermission } = useAuth()
-  const {
-    ClientReferences,
-    installer,
-    installerDispatch,
-    selectedClientRef,
-    setSelectedClientRef,
-    newMeterNumber,
-    setNewMeterNumber,
-    reading,
-    setReading,
-    taking,
-    setTaking,
-    uri,
-    setUri,
-    uris,
-    setUris,
-    thumbUri,
-    setThumbUri,
-  } = useInstaller()
+  const { replace, push } = useRouter()
+
+  const { taking, setTaking, uris, setUris } = useInstaller()
 
   const cameraRef = useRef(null)
   const activeRef = useRef(false)
@@ -48,12 +41,6 @@ const Camera = () => {
     }, [])
   )
 
-  // useEffect(() => {
-  //   if (pic_count === 2) {
-  //     replace('/installer/confirm')
-  //   }
-  // }, [pic_count])
-
   const takePhoto = async () => {
     if (!cameraRef.current || taking || !activeRef.current) return
     try {
@@ -63,6 +50,7 @@ const Camera = () => {
         base64: false,
         skipProcessing: true,
       })
+
       if (pic_count < 3) setUris((prevUris) => [...prevUris, photo.uri])
 
       if (pic_count >= 2) {
@@ -75,9 +63,6 @@ const Camera = () => {
     }
   }
 
-  // if (!activeRef.current)
-  //   return <View style={{ flex: 1, backgroundColor: 'black' }} />
-
   return (
     <View style={{ flex: 1 }}>
       <CameraView
@@ -87,26 +72,9 @@ const Camera = () => {
         autofocus="on"
         enableHighQualityPhotos
       />
-      <View style={styles.overlay}>
-        <View style={styles.focusSquare}>
-          <View style={[styles.corner, styles.topLeft]}>
-            <View style={styles.lineH} />
-            <View style={styles.lineV} />
-          </View>
-          <View style={[styles.corner, styles.topRight]}>
-            <View style={styles.lineH} />
-            <View style={styles.lineV} />
-          </View>
-          <View style={[styles.corner, styles.bottomLeft]}>
-            <View style={styles.lineH} />
-            <View style={styles.lineV} />
-          </View>
-          <View style={[styles.corner, styles.bottomRight]}>
-            <View style={styles.lineH} />
-            <View style={styles.lineV} />
-          </View>
-        </View>
-      </View>
+
+      <FocusBox />
+
       <View style={styles.layer}>
         <View style={styles.topBar}>
           <View style={styles.count}>
@@ -173,29 +141,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  focusSquare: { width: squareSize, height: squareSize, position: 'relative' },
-  corner: { position: 'absolute', width: cornerLength, height: cornerLength },
-  lineH: {
-    position: 'absolute',
-    height: cornerThickness,
-    width: cornerLength,
-    backgroundColor: '#fff',
-  },
-  lineV: {
-    position: 'absolute',
-    width: cornerThickness,
-    height: cornerLength,
-    backgroundColor: '#fff',
-  },
-  topLeft: { top: 0, left: 0 },
-  topRight: { top: 0, right: 0, transform: [{ rotate: '90deg' }] },
-  bottomLeft: { bottom: 0, left: 0, transform: [{ rotate: '-90deg' }] },
-  bottomRight: { bottom: 0, right: 0, transform: [{ rotate: '180deg' }] },
   layer: {
     position: 'absolute',
     top: 0,

@@ -1,14 +1,17 @@
 // react
 import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { Picker } from '@react-native-picker/picker'
+
+// expo
+import { useRouter } from 'expo-router'
+
+// context
+import { useInspector } from '../../src/context/inspectors/context'
 
 // components
 import ScreenContainer from '../../src/components/screen-container'
 import ScreenLogo from '../../src/components/screen-logo'
-import { useInspector } from '../../src/context/inspectors/context'
-import { Picker } from '@react-native-picker/picker'
 import GradientButton from '../../src/components/GradientButton'
-import { useRouter } from 'expo-router'
-import { useEffect } from 'react'
 
 const Dashboard = () => {
   const { replace } = useRouter()
@@ -104,6 +107,7 @@ const Dashboard = () => {
           keyboardType="numeric"
           value={reading}
           onChangeText={setReading}
+          placeholderTextColor={'#333'}
         />
         <GradientButton
           title="SUBMIT METER READING"

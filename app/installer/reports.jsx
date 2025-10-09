@@ -17,20 +17,29 @@ import SegTabs from '../../src/components/seg-tabs'
 
 // images
 import bg from '../../assets/splash.png'
+import { useAuth } from '../../src/context/auth/context'
 
 const Reports = () => {
+  const { role } = useAuth()
   const router = useRouter()
   const { items = [], refresh = async () => {} } = useQueue() || {}
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState('pending')
 
   const data = useMemo(() => {
-    if (tab === 'pending')
-      return items?.filter(
-        (i) => i?.status === 'pending' || i?.status === 'failed'
+    // if (tab === 'pending')
+    //   return items?.filter(
+    //     (i) => i?.status === 'pending' || i?.status === 'failed'
+    //   )
+    // return items?.filter((i) => i?.status === 'ok')
+    if (tab === 'pending') {
+      return items.filter(
+        (i) =>
+          i.role === role && (i.status === 'pending' || i.status === 'failed')
       )
-    return items?.filter((i) => i?.status === 'ok')
-  }, [items, tab])
+    }
+    return items.filter((i) => i.role === role && i.status === 'ok')
+  }, [items, tab, role])
 
   const onRefresh = useCallback(async () => {
     setLoading(true)
