@@ -33,20 +33,32 @@ const AuthProvider = ({ children }) => {
   const [auth, authDispatch] = useReducer(authReducer, initialAuthState)
   const [role, setRole] = useState(null)
 
-  const [cameraPermission, requestPermission] = useCameraPermissions()
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions()
   const [mediaPermission, requestMediaPermission] =
     MediaLibrary.usePermissions()
 
   useEffect(() => {
     // Ask once on mount if not granted
-    if (cameraPermission && cameraPermission.status === 'undetermined') {
-      requestPermission().catch(() => {})
-    }
+    ;(async () => {
+      try {
+        if (cameraPermission?.status === 'undetermined') {
+          await requestCameraPermission()
+        }
+        if (mediaPermission?.status === 'undetermined') {
+          await requestMediaPermission()
+        }
+      } catch {}
+    })()
+  }, [cameraPermission?.status, mediaPermission?.status])
 
-    if (mediaPermission && mediaPermission.status !== 'granted') {
-      requestMediaPermission().catch(() => {})
-    }
-  }, [cameraPermission?.status])
+  //   if (cameraPermission && cameraPermission.status === 'undetermined') {
+  //     requestPermission().catch(() => {})
+  //   }
+
+  //   if (mediaPermission && mediaPermission.status !== 'granted') {
+  //     requestMediaPermission().catch(() => {})
+  //   }
+  // }, [cameraPermission?.status])
 
   // const { status, canAskAgain } = await MediaLibrary.getPermissionsAsync()
   //   let granted = status === 'granted'
@@ -74,7 +86,7 @@ const AuthProvider = ({ children }) => {
           Media library permission is required to store photos.
         </Text>
         <TouchableOpacity
-          onPress={() => requestPermission()}
+          onPress={() => requestMediaPermission()}
           style={styles.permBtn}
         >
           <Text style={{ color: '#fff', fontWeight: '700' }}>Allow Media</Text>
@@ -97,7 +109,7 @@ const AuthProvider = ({ children }) => {
           Camera permission is required to take photos.
         </Text>
         <TouchableOpacity
-          onPress={() => requestPermission()}
+          onPress={() => requestCameraPermission()}
           style={styles.permBtn}
         >
           <Text style={{ color: '#fff', fontWeight: '700' }}>Allow Camera</Text>

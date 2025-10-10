@@ -32,6 +32,7 @@ const Confirm = () => {
     setUri,
     setTaking,
     setThumbUri,
+    selectedClientRef,
   } = useInspector()
 
   const submit = async () => {
@@ -53,6 +54,7 @@ const Confirm = () => {
           readingDateISO,
           readingTimeISO,
           photoUri: uri,
+          clientRef: selectedClientRef,
         },
       })
 
@@ -75,6 +77,7 @@ const Confirm = () => {
           readingDateISO,
           readingTimeISO,
           photoUri: uri,
+          clientRef: selectedClientRef,
         },
       })
 
@@ -102,8 +105,10 @@ const Confirm = () => {
             />
           ) : null}
           <Text style={styles.label}>METER LOGGED:</Text>
-          <Text style={styles.value}>{String(meterNumber ?? '—')}</Text>
+          {/* <Text style={styles.value}>{String(meterNumber ?? '—')}</Text> */}
           <View style={{ height: 12 }} />
+          <Text>Client: {selectedClientRef ?? '—'}</Text>
+          <Text>Meter: {String(meterNumber ?? '—')}</Text>
           <Text>Date: {readingDateISO.slice(0, 10)}</Text>
           <Text>Time: {new Date(readingTimeISO).toLocaleTimeString()}</Text>
           <View style={{ height: 32 }} />

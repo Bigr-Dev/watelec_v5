@@ -135,8 +135,10 @@ const Confirm = () => {
           </View>
           <View style={styles.card}>
             <Text style={styles.label}>METER LOGGED:</Text>
-            <Text style={styles.value}>{String(newMeterNumber ?? '—')}</Text>
+            {/* <Text style={styles.value}>{String(newMeterNumber ?? '—')}</Text> */}
             <View style={{ height: 12 }} />
+            <Text>Client Ref: {selectedClientRef}</Text>
+            <Text>Meter No: {String(newMeterNumber ?? '—')}</Text>
             <Text>Date: {readingDateISO.slice(0, 10)}</Text>
             <Text>Time: {new Date(readingTimeISO).toLocaleTimeString()}</Text>
           </View>

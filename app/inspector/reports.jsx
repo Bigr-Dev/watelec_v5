@@ -17,6 +17,7 @@ import ScreenContainer from '../../src/components/screen-container'
 // images
 import bg from '../../assets/splash.png'
 import { useAuth } from '../../src/context/auth/context'
+import { useInspector } from '../../src/context/inspectors/context'
 
 const Reports = () => {
   const { role } = useAuth()
@@ -24,6 +25,8 @@ const Reports = () => {
   const { items = [], refresh = async () => {} } = useQueue() || {}
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState('pending')
+  const { selectedClientRef } = useInspector()
+  console.log('selectedClientRef :>> ', selectedClientRef)
 
   const data = useMemo(() => {
     if (tab === 'pending') {
@@ -64,9 +67,8 @@ const Reports = () => {
           <View style={styles.thumb} />
         )}
         <View style={{ flex: 1 }}>
-          <Text style={styles.title}>
-            Meter Number: {it.meterNumber ?? '—'}
-          </Text>
+          <Text style={styles.title}>Client: {it.clientRef ?? '—'}</Text>
+          <Text>Meter: {it.meterNumber ?? '—'}</Text>
           {tab === 'pending' ? (
             <>
               <Text>Reading: {it.readingValue ?? '—'}</Text>

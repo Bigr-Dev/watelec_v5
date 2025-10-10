@@ -110,6 +110,11 @@ const Details = () => {
               </TouchableOpacity>
             ))}
           </View>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            <Text style={styles.title}>CLIENT:</Text>
+            <Text style={''}>{String(it?.clientRef ?? '')}</Text>
+          </View>
+          <View style={{ height: 12 }} />
           <Text>Meter Number</Text>
           <TextInput
             value={meterNumber}
@@ -178,4 +183,5 @@ const styles = StyleSheet.create({
     borderColor: '#c7d4de',
     height: 52,
   },
+  title: { fontWeight: 'bold', marginBottom: 4 },
 })

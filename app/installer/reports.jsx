@@ -18,6 +18,7 @@ import SegTabs from '../../src/components/seg-tabs'
 // images
 import bg from '../../assets/splash.png'
 import { useAuth } from '../../src/context/auth/context'
+import { useInstaller } from '../../src/context/installers/context'
 
 const Reports = () => {
   const { role } = useAuth()
@@ -71,9 +72,8 @@ const Reports = () => {
           <View style={styles.thumb} />
         )}
         <View style={{ flex: 1 }}>
-          <Text style={styles.title}>
-            Meter Number: {it.meterNumber ?? '—'}
-          </Text>
+          <Text style={styles.title}>Client: {it.clientRef ?? '—'}</Text>
+          <Text>Meter Number: {it.meterNumber ?? '—'}</Text>
           {tab === 'pending' ? (
             <>
               <Text>Reading: {it?.readingValue ?? '—'}</Text>
