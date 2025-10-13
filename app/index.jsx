@@ -45,7 +45,7 @@ const Index = () => {
           <DashboardCard title={`INSTALLER`} href={'installer'}>
             <AntDesign name="user-add" size={38} color="white" />
           </DashboardCard>
-          <DashboardCard title="INSPECTOR" href={'inspector'}>
+          <DashboardCard title="READINGS" href={'inspector'}>
             <AntDesign name="user" size={38} color="white" />
           </DashboardCard>
         </View>

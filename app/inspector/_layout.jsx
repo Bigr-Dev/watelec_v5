@@ -55,7 +55,7 @@ export default function InspectorLayout() {
             options={{
               ...blueHeader,
               ...customHeader,
-              title: 'View Submission',
+              title: 'View Reading',
             }}
           />
         </Stack>
