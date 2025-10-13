@@ -36,106 +36,93 @@ export async function migrateDbIfNeeded(db) {
     CREATE INDEX IF NOT EXISTS idx_queued_items_clientRef ON queued_items(clientRef);
     CREATE INDEX IF NOT EXISTS idx_queued_items_role_status_created
       ON queued_items(role, status, created_at);
+    CREATE INDEX IF NOT EXISTS idx_qi_role_kind_client_created
+    ON queued_items(role, kind, clientRef, created_at);
   `)
 }
 
-// export async function migrateDbIfNeeded(db) {
-//   await db.execAsync(`PRAGMA journal_mode = WAL;`)
+export async function getLastLocalReading(db, { clientRef, meterNumber }) {
+  // Accept anything except explicit failures. Adjust the NOT IN list if you use other terminal states.
+  const rows = await db.getAllAsync(
+    `
+    SELECT
+      json_extract(payload, '$.MeterNumber') AS MeterNumber,
+      json_extract(payload, '$.ReadingValue') AS ReadingValue,
+      json_extract(payload, '$.ReadingDate')  AS ReadingDate,
+      json_extract(payload, '$.ReadingTime')  AS ReadingTime,
+      json_extract(payload, '$.ReadingDateTime') AS ReadingDateTime,
+      created_at
+    FROM queued_items
+    WHERE role = 'inspector'
+      AND kind = 'uploadReading'
+      AND clientRef = ?
+      AND json_extract(payload, '$.MeterNumber') = ?
+      AND IFNULL(status, '') NOT IN ('failed', 'error')
+    ORDER BY
+      /* Prefer an explicit combined timestamp if present */
+      COALESCE(
+        ReadingDateTime,
 
-//   // 1) Ensure base table exists (original shape)
-//   await db.execAsync(`
-//     CREATE TABLE IF NOT EXISTS queued_items (
-//       id TEXT PRIMARY KEY,
-//       kind TEXT NOT NULL,            -- 'reading' | 'install' (legacy)
-//       payload TEXT NOT NULL,         -- JSON string
-//       status TEXT NOT NULL,          -- 'pending' | 'failed' | 'ok'
-//       tries INTEGER NOT NULL DEFAULT 0,
-//       created_at INTEGER NOT NULL,   -- epoch ms
-//       updated_at INTEGER NOT NULL
-//     );
-//   `)
+        /* Fallback: build an ISO-like string from date+time if both exist */
+        CASE
+          WHEN ReadingDate IS NOT NULL AND ReadingTime IS NOT NULL
+          THEN (ReadingDate || 'T' || ReadingTime)
 
-//   // 2) Add role column if it doesn't exist
-//   const columns = await db.getAllAsync(`PRAGMA table_info(queued_items);`)
-//   const hasRole = columns?.some((c) => c.name === 'role')
+          /* Date only? treat as end of the day so it still sorts sensibly */
+          WHEN ReadingDate IS NOT NULL
+          THEN (ReadingDate || 'T23:59:59')
+        END,
 
-//   if (!hasRole) {
-//     // Nullable for backward compatibility
-//     await db.execAsync(`ALTER TABLE queued_items ADD COLUMN role TEXT;`)
-//   }
+        /* Last resort: created_at millis → ISO string for ordering */
+        datetime(created_at / 1000, 'unixepoch')
+      ) DESC
+    LIMIT 1
+    `,
+    [clientRef, String(meterNumber)]
+  )
 
-//   // 3) Create helpful indexes (id is already PK)
-//   await db.execAsync(`
-//     CREATE INDEX IF NOT EXISTS idx_queued_items_status ON queued_items(status);
-//     CREATE INDEX IF NOT EXISTS idx_queued_items_created ON queued_items(created_at);
-//     CREATE INDEX IF NOT EXISTS idx_queued_items_role ON queued_items(role);
-//     -- Optional composite to speed screens like "reports by role + status + recency"
-//     CREATE INDEX IF NOT EXISTS idx_queued_items_role_status_created
-//       ON queued_items(role, status, created_at);
-//   `)
-// }
+  const row = rows?.[0]
+  if (!row) return null
 
-// export async function migrateDbIfNeeded(db) {
-//   await db.execAsync(`
-//     PRAGMA journal_mode = WAL;
-//     CREATE TABLE IF NOT EXISTS queued_items (
-//       id TEXT PRIMARY KEY,
-//       kind TEXT NOT NULL,            -- 'reading' | 'install'
-//       payload TEXT NOT NULL,         -- JSON string
-//       status TEXT NOT NULL,          -- 'pending' | 'failed' | 'ok'
-//       tries INTEGER NOT NULL DEFAULT 0,
-//       created_at INTEGER NOT NULL,   -- epoch ms
-//       updated_at INTEGER NOT NULL
-//     );
+  const valueNum = Number(row.ReadingValue)
+  if (!Number.isFinite(valueNum)) return null
 
-//     CREATE INDEX IF NOT EXISTS idx_queued_items_status ON queued_items(status);
-//     CREATE INDEX IF NOT EXISTS idx_queued_items_created ON queued_items(created_at);
-//   `)
-// }
+  return {
+    value: valueNum,
+    date: row.ReadingDate ?? null,
+    time: row.ReadingTime ?? null,
+    when:
+      row.ReadingDateTime ??
+      (row.ReadingDate && row.ReadingTime
+        ? `${row.ReadingDate}T${row.ReadingTime}`
+        : row.ReadingDate ?? null),
+  }
+}
 
-// import * as SQLite from 'expo-sqlite'
-// export const db = SQLite.openDatabase('watelec.db')
+export async function assertNotLowerThanLastLocal({
+  db,
+  clientRef,
+  meterNumber,
+  currentValue, // number or numeric string
+}) {
+  const last = await getLastLocalReading(db, { clientRef, meterNumber })
+  if (!last) return { ok: true, last: null } // no prior reading locally
 
-// // Call once on app start
-// export function initDb() {
-//   db.transaction((tx) => {
-//     tx.executeSql('PRAGMA foreign_keys = ON;')
+  const currentNum = Number(currentValue)
+  if (!Number.isFinite(currentNum)) {
+    return { ok: false, error: 'Invalid current meter reading.' }
+  }
 
-//     // Pending queue (offline-first)
-//     tx.executeSql(`
-//       CREATE TABLE IF NOT EXISTS queued_readings (
-//         id INTEGER PRIMARY KEY AUTOINCREMENT,
-//         role TEXT NOT NULL,               -- 'inspector' | 'installer'
-//         clientRef TEXT NOT NULL,
-//         meterNumber TEXT NOT NULL,
-//         readingValue REAL,                -- nullable for installer pre-photo
-//         readingDate TEXT,                 -- ISO string
-//         readingTime TEXT,                 -- ISO string or HH:mm
-//         imageUri TEXT,                    -- file:// path to image
-//         imageUri2 TEXT,                   -- installer only
-//         imageUri3 TEXT,                   -- installer only
-//         payload TEXT,                     -- optional JSON for future fields
-//         createdAt TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
-//         lastError TEXT
-//       );
-//     `)
+  if (currentNum < last.value) {
+    return {
+      ok: false,
+      error: `Reading too low: ${currentNum} < previous ${last.value}${
+        last.when ? ` (${last.when})` : ''
+      }.`,
+      last,
+    }
+  }
 
-//     // Success log (for your “reports / logs” tab)
-//     tx.executeSql(`
-//       CREATE TABLE IF NOT EXISTS successful_readings (
-//         id INTEGER PRIMARY KEY AUTOINCREMENT,
-//         role TEXT NOT NULL,
-//         clientRef TEXT NOT NULL,
-//         meterNumber TEXT NOT NULL,
-//         readingValue REAL,
-//         readingDate TEXT,
-//         readingTime TEXT,
-//         imageUri TEXT,
-//         imageUri2 TEXT,
-//         imageUri3 TEXT,
-//         serverResponse TEXT,             -- JSON from server
-//         createdAt TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
-//       );
-//     `)
-//   })
-// }
+  return { ok: true, last }
+}
+

@@ -12,3 +12,9 @@ export const LIST_METERS_BY_CLIENT_URL = (clientRef) =>
 
 // Installer endpoint (placeholder - confirm exact path with backend)
 export const INSTALL_METER_URL = `${API_BASE_METERS}/api/meters/install`
+
+//  GET /meters/{clientRef}/{meterNumber}/last-reading
+export const LAST_READING_URL = (clientRef, meterNumber) =>
+  `${API_BASE_URL}/meters/${encodeURIComponent(clientRef)}/${encodeURIComponent(
+    meterNumber
+  )}/last-reading`

@@ -1,15 +1,19 @@
-import { Image, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, Image, StyleSheet, Text, TextInput, View } from 'react-native'
 import React, { useMemo, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useQueue } from '../../src/context/QueueContext'
 import ScreenContainer from '../../src/components/screen-container'
 import GradientButton from '../../src/components/GradientButton'
+import { useSQLiteContext } from 'expo-sqlite'
+import { useInspector } from '../../src/context/inspectors/context'
 
 const Details = () => {
   const { id } = useLocalSearchParams()
   const { items = [] } = useQueue() || {}
   const q = useQueue() || {}
   const router = useRouter()
+  const db = useSQLiteContext()
+  const { handleUpload, handleRetry } = useInspector()
 
   // Tolerate either q.queue or q.items
   const list = useMemo(() => {
@@ -23,7 +27,7 @@ const Details = () => {
     return items?.find((x) => (x.id || `ts_${x.createdAt}`) === id)
   }, [items, id])
   const it = item?.payload ?? item
-  console.log('item :>> ', item)
+  //console.log('it :>> ', it)
   const [meterNumber, setMeterNumber] = useState(String(it?.meterNumber ?? ''))
   const [readingValue, setReadingValue] = useState(
     it?.readingValue != null ? String(it.readingValue) : ''
@@ -48,14 +52,42 @@ const Details = () => {
     })
     Alert.alert('Saved', 'Changes saved locally')
   }
-
+  // const meter_reading = {
+  //   MeterNumber: String(meterNumber ?? ''),
+  //   ReadingValue: Number(readingValue ?? 0),
+  //   ReadingDate: it.readingDateISO,
+  //   ReadingTime: it.readingTimeISO,
+  //   // uri,
+  // }
+  console.log('meters :>> ', it)
   const doRetry = async () => {
-    const ok = await retry(item.id)
-    Alert.alert(
-      ok ? 'Uploaded' : 'Failed',
-      ok ? 'Uploaded successfully' : 'Still failing.'
-    )
-    if (ok) router.back()
+    try {
+      const meter_reading = {
+        MeterNumber: String(meterNumber ?? ''),
+        ReadingValue: Number(readingValue ?? 0),
+        ReadingDate: it.readingDateISO,
+        ReadingTime: it.readingTimeISO,
+        uri: it.photoUri,
+      }
+      const clientRef = it.clientRef
+      // console.log('meter_reading :>> ', meter_reading)
+      await handleRetry(meter_reading, clientRef)
+      router.back()
+    } catch (error) {
+      await update(item.id, {
+        ...(item.payload ?? {}),
+        meterNumber: String(meterNumber),
+        readingValue: Number(readingValue || 0),
+      })
+      Alert.alert('Saved', 'Changes saved locally')
+    }
+
+    // const ok = await retry(item.id)
+    // Alert.alert(
+    //   ok ? 'Uploaded' : 'Failed',
+    //   ok ? 'Uploaded successfully' : 'Still failing.'
+    // )
+    // if (ok) router.back()
   }
 
   const del = async () => {
@@ -121,7 +153,7 @@ const Details = () => {
                 title="Retry Upload"
                 style={{ width: '100%' }}
                 onPress={() => {
-                  save()
+                  // save()
                   doRetry()
                 }}
               />

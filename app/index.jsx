@@ -16,40 +16,7 @@ import { useAuth } from '../src/context/auth/context'
 const watelec_bg = require('../assets/splash.png')
 const watelec_logo = require('../assets/logo-icon.png')
 
-// import { useSQLiteContext } from 'expo-sqlite'
-
-// export function useClearDatabase() {
-//   const db = useSQLiteContext()
-
-//   async function clearDatabase() {
-//     try {
-//       await db.execAsync('DELETE FROM queued_items;')
-//       console.log('✅ Database queue cleared')
-//     } catch (err) {
-//       console.warn('⚠️ Failed to clear database', err)
-//     }
-//   }
-
-//   return clearDatabase()
-// }
-
-// function useListTables() {
-//   const db = useSQLiteContext()
-//   return async () => {
-//     const tables = await db.getAllAsync(
-//       `SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`
-//     )
-//     console.log(
-//       'Tables:',
-//       tables.map((t) => t.name)
-//     )
-//     return tables
-//   }
-// }
-
 const Index = () => {
-  const { push } = useRouter()
-  const { auth, authDispatch, handleLogin, role, setRole } = useAuth()
   return (
     <ImageBackground
       source={watelec_bg}
@@ -68,8 +35,6 @@ const Index = () => {
           source={watelec_logo}
           resizeMethod="contain"
           style={{ height: 80, width: 80 }}
-          // width={10}
-          // height={10}
         />
         <Text style={styles.title}>WATELEC</Text>
         <Text style={styles.subtitle}>Water Meter Management</Text>
@@ -81,7 +46,6 @@ const Index = () => {
             <AntDesign name="user-add" size={38} color="white" />
           </DashboardCard>
           <DashboardCard title="INSPECTOR" href={'inspector'}>
-            {/* <Octicons name="meter" size={38} color="white" /> */}
             <AntDesign name="user" size={38} color="white" />
           </DashboardCard>
         </View>

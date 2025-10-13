@@ -26,7 +26,6 @@ const Reports = () => {
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState('pending')
   const { selectedClientRef } = useInspector()
-  console.log('selectedClientRef :>> ', selectedClientRef)
 
   const data = useMemo(() => {
     if (tab === 'pending') {

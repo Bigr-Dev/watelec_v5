@@ -124,11 +124,12 @@ export function QueueProvider({ children }) {
 
       await db.runAsync(
         `INSERT INTO queued_items
-          (id, role, kind, payload, status, tries, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          (id, role, kind, clientRef, payload, status, tries, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(id) DO UPDATE SET
            role = excluded.role,
            kind = excluded.kind,
+           clientRef = excluded.clientRef,
            payload = excluded.payload,
            status = excluded.status,
            tries = excluded.tries,
@@ -136,11 +137,20 @@ export function QueueProvider({ children }) {
         id,
         role,
         kind,
+        payload?.clientRef ?? null,
         JSON.stringify(payload ?? {}),
         status,
         tries,
         t,
         t
+        // id,
+        // role,
+        // kind,
+        // JSON.stringify(payload ?? {}),
+        // status,
+        // tries,
+        // t,
+        // t
       )
       await refresh()
       return id

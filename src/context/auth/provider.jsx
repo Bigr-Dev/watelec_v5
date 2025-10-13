@@ -16,17 +16,6 @@ import authReducer from './reducer'
 // api
 import { fetchCurrentUser } from './api'
 
-import AsyncStorage from '@react-native-async-storage/async-storage'
-
-// export async function clearAsyncStorage() {
-//   try {
-//     await AsyncStorage.clear()
-//     console.log('✅ AsyncStorage cleared')
-//   } catch (e) {
-//     console.warn('⚠️ Failed to clear AsyncStorage', e)
-//   }
-// }
-
 const AuthProvider = ({ children }) => {
   const { replace } = useRouter()
   // auth state
@@ -50,27 +39,6 @@ const AuthProvider = ({ children }) => {
       } catch {}
     })()
   }, [cameraPermission?.status, mediaPermission?.status])
-
-  //   if (cameraPermission && cameraPermission.status === 'undetermined') {
-  //     requestPermission().catch(() => {})
-  //   }
-
-  //   if (mediaPermission && mediaPermission.status !== 'granted') {
-  //     requestMediaPermission().catch(() => {})
-  //   }
-  // }, [cameraPermission?.status])
-
-  // const { status, canAskAgain } = await MediaLibrary.getPermissionsAsync()
-  //   let granted = status === 'granted'
-  //   if (!granted && canAskAgain) {
-  //     const r = await MediaLibrary.requestPermissionsAsync()
-  //     granted = r.status === 'granted'
-  //   }
-  //   if (!granted) return { saved: false, reason: 'permission-denied' }
-
-  // if (!cameraPermission) {
-  //   return <View style={{ flex: 1, backgroundColor: 'black' }} />
-  // }
 
   if (!mediaPermission?.granted) {
     return (

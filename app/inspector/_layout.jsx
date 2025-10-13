@@ -46,7 +46,7 @@ export default function InspectorLayout() {
             options={{
               ...blueHeader,
               ...customHeader,
-              title: 'Inspector Reports',
+              title: 'Reading Reports',
               unmountOnBlur: true,
             }}
           />

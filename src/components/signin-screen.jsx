@@ -94,7 +94,12 @@ const SigninScreen = ({ subtitle }) => {
                   <Text style={styles.subtitle}>{subtitle}</Text>
                   <Text style={styles.appTitle}>LOGIN</Text>
                 </View>
-                <View style={{ width: '100%', marginBottom: 20 }}>
+                <View
+                  style={{
+                    width: '100%',
+                    marginBottom: 20,
+                  }}
+                >
                   <Text
                     style={{
                       marginBottom: 5,
@@ -106,7 +111,21 @@ const SigninScreen = ({ subtitle }) => {
                     Email
                   </Text>
                   <TextInput
-                    style={[styles.input, { marginBottom: 20 }]}
+                    style={[
+                      styles.input,
+                      {
+                        //marginBottom: 20
+                        //  backgroundColor: '#eef2f5',
+                        borderRadius: 12,
+                        paddingHorizontal: 14,
+                        paddingVertical: 12,
+                        marginBottom: 32,
+                        borderWidth: 1,
+                        borderColor: '#c7d4de',
+                        height: 52,
+                        color: '#333',
+                      },
+                    ]}
                     placeholder="Email"
                     value={email}
                     onChangeText={setEmail}
@@ -126,7 +145,12 @@ const SigninScreen = ({ subtitle }) => {
                   </Text>
                   <View style={styles.inputContainer}>
                     <TextInput
-                      style={[styles.input, { width: '90%' }]}
+                      style={[
+                        styles.input,
+                        {
+                          width: '90%',
+                        },
+                      ]}
                       placeholder="Password"
                       value={password}
                       onChangeText={setPassword}
@@ -202,13 +226,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F5F5F5',
-    // padding: 15,
-    borderRadius: 10,
+
     marginBottom: 20,
 
     fontSize: 16,
     width: '100%',
     color: '#333',
+
+    borderRadius: 12,
+
+    borderWidth: 1,
+    borderColor: '#c7d4de',
+    height: 52,
   },
   input: {
     backgroundColor: '#F5F5F5',
@@ -220,6 +249,17 @@ const styles = StyleSheet.create({
     width: '100%',
     color: '#333',
   },
+  // input: {
+  //   backgroundColor: '#eef2f5',
+  //   borderRadius: 12,
+  //   paddingHorizontal: 14,
+  //   paddingVertical: 12,
+  //   marginBottom: 32,
+  //   borderWidth: 1,
+  //   borderColor: '#c7d4de',
+  //   height: 52,
+  //   color: '#333',
+  // },
   welcomeText: {
     fontSize: 16,
     color: '#666',

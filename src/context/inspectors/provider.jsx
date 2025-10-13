@@ -8,11 +8,13 @@ import { initialInspectorState, InspectorContext } from './context'
 // reducer
 import inspectorReducer from './reducer'
 import { fetchMeters, uploadMeterReading } from './api'
+import { useSQLiteContext } from 'expo-sqlite'
 
 const InspectorProvider = ({ children }) => {
   const {
     auth: { ClientReferences },
   } = useAuth()
+  const db = useSQLiteContext()
 
   const [inspector, inspectorDispatch] = useReducer(
     inspectorReducer,
@@ -62,7 +64,21 @@ const InspectorProvider = ({ children }) => {
       uri,
     }
 
-    await uploadMeterReading({ meter_reading, inspectorDispatch })
+    await uploadMeterReading({
+      db,
+      clientRef,
+      meter_reading,
+      inspectorDispatch,
+    })
+  }
+
+  const handleRetry = async (meter_reading, clientRef) => {
+    await uploadMeterReading({
+      db,
+      clientRef,
+      meter_reading,
+      inspectorDispatch,
+    })
   }
 
   return (
@@ -87,6 +103,7 @@ const InspectorProvider = ({ children }) => {
         setUri,
         fetchMeters,
         handleUpload,
+        handleRetry,
       }}
     >
       {children}

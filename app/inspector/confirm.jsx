@@ -17,8 +17,10 @@ import GradientButton from '../../src/components/GradientButton'
 // utils
 import { trySaveToGalleryAsync } from '../../src/utils/photo-storage'
 import { readingDateISO, readingTimeISO, now } from '../../src/utils/helpers'
+import { useSQLiteContext } from 'expo-sqlite'
 
 const Confirm = () => {
+  const db = useSQLiteContext()
   const { replace } = useRouter()
   const q = useQueue() || {}
   const enqueue = q.enqueue || (async () => {})
