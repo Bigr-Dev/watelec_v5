@@ -6,7 +6,6 @@ import ScreenContainer from '../../src/components/screen-container'
 import ScreenLogo from '../../src/components/screen-logo'
 import { useRouter } from 'expo-router'
 
-import { useState } from 'react'
 import { useInstaller } from '../../src/context/installers/context'
 import { Picker } from '@react-native-picker/picker'
 import GradientButton from '../../src/components/GradientButton'
@@ -20,14 +19,6 @@ const Dashboard = () => {
     setSelectedClientRef,
     newMeterNumber,
     setNewMeterNumber,
-    // inspector: { loading },
-    // selectedClientRef,
-    // setSelectedClientRef,
-    // meterOptions,
-    // meterNumber,
-    // setMeterNumber,
-    // reading,
-    // setReading,
   } = useInstaller()
 
   const openCamera = () => {

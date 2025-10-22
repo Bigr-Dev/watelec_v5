@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useQueue } from '../../src/context/QueueContext'
 import ScreenContainer from '../../src/components/screen-container'

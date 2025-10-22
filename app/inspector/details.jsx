@@ -1,26 +1,28 @@
 import { Alert, Image, StyleSheet, Text, TextInput, View } from 'react-native'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useQueue } from '../../src/context/QueueContext'
 import ScreenContainer from '../../src/components/screen-container'
 import GradientButton from '../../src/components/GradientButton'
-import { useSQLiteContext } from 'expo-sqlite'
+
 import { useInspector } from '../../src/context/inspectors/context'
+
+const fallback_img = require('../../assets/placeholder.webp')
 
 const Details = () => {
   const { id } = useLocalSearchParams()
   const { items = [] } = useQueue() || {}
   const q = useQueue() || {}
   const router = useRouter()
-  const db = useSQLiteContext()
+
   const { handleUpload, handleRetry } = useInspector()
 
   // Tolerate either q.queue or q.items
-  const list = useMemo(() => {
-    if (Array.isArray(q.queue) && q.queue.length) return q.queue
-    if (Array.isArray(q.items)) return q.items
-    return []
-  }, [q.queue, q.items])
+  // const list = useMemo(() => {
+  //   if (Array.isArray(q.queue) && q.queue.length) return q.queue
+  //   if (Array.isArray(q.items)) return q.items
+  //   return []
+  // }, [q.queue, q.items])
 
   // const item = list.find((x) => String(x?.id) === String(id))
   const item = useMemo(() => {
@@ -30,7 +32,9 @@ const Details = () => {
   //console.log('it :>> ', it)
   const [meterNumber, setMeterNumber] = useState(String(it?.meterNumber ?? ''))
   const [readingValue, setReadingValue] = useState(
-    it?.readingValue != null ? String(it.readingValue) : ''
+    String(it?.readingValue) || it?.readingValue === 0
+      ? String(it?.readingValue)
+      : ''
   )
 
   if (!item)
@@ -59,9 +63,20 @@ const Details = () => {
   //   ReadingTime: it.readingTimeISO,
   //   // uri,
   // }
-  console.log('meters :>> ', it)
+  console.log('meters :>> ', it.readingDateISO)
   const doRetry = async () => {
     try {
+      // Validate required data
+      if (!it?.photoUri) {
+        Alert.alert('Error', 'Photo is required for upload')
+        return
+      }
+
+      if (!it?.clientRef) {
+        Alert.alert('Error', 'Client reference is missing')
+        return
+      }
+
       const meter_reading = {
         MeterNumber: String(meterNumber ?? ''),
         ReadingValue: Number(readingValue ?? 0),
@@ -69,17 +84,47 @@ const Details = () => {
         ReadingTime: it.readingTimeISO,
         uri: it.photoUri,
       }
-      const clientRef = it.clientRef
-      // console.log('meter_reading :>> ', meter_reading)
-      await handleRetry(meter_reading, clientRef)
+      const clientRef = it?.clientRef
+      try {
+        await handleRetry(meter_reading, clientRef)
+        await enqueue({
+          id: `${Date.now()}`,
+          role: 'inspector',
+          kind: 'reading',
+          status: 'ok',
+          tries: 1,
+          payload: {
+            meterNumber: String(meterNumber ?? ''),
+            readingValue: Number(reading ?? 0),
+            readingDateISO,
+            readingTimeISO,
+            photoUri: uri,
+            clientRef: selectedClientRef,
+          },
+        })
+      } catch (error) {
+        console.log('error :>> ', error)
+        Alert.alert('Error', 'Upload failed and could not save changes locally')
+      }
+
       router.back()
     } catch (error) {
-      await update(item.id, {
-        ...(item.payload ?? {}),
-        meterNumber: String(meterNumber),
-        readingValue: Number(readingValue || 0),
-      })
-      Alert.alert('Saved', 'Changes saved locally')
+      console.error('doRetry failed:', error)
+      // Save changes locally as fallback
+      try {
+        await update(item.id, {
+          ...(item.payload ?? {}),
+          meterNumber: String(meterNumber),
+          readingValue: Number(readingValue || 0),
+        })
+        Alert.alert(
+          'Upload Failed',
+          'Changes saved locally. Please try again when you have a better connection.'
+        )
+      } catch (updateError) {
+        console.error('Failed to save locally:', updateError)
+        Alert.alert('Error', 'Upload failed and could not save changes locally')
+      }
     }
 
     // const ok = await retry(item.id)
@@ -91,8 +136,8 @@ const Details = () => {
   }
 
   const del = async () => {
-    await remove(item.id)
     router.back()
+    await remove(item.id)
   }
 
   const previewUri = it?.photoUri
@@ -138,7 +183,7 @@ const Details = () => {
             style={{
               flex: 1,
               flexDirection: 'row',
-              alignItems: 'center ',
+              alignItems: 'center',
               justifyContent: 'space-between',
               marginTop: 24,
             }}

@@ -8,12 +8,12 @@ import {
   Text,
   View,
 } from 'react-native'
-import React, { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import SegTabs from '../../src/components/seg-tabs'
-import GradientButton from '../../src/components/GradientButton'
+
 import { useQueue } from '../../src/context/QueueContext'
 import { useRouter } from 'expo-router'
-import ScreenContainer from '../../src/components/screen-container'
+
 // images
 import bg from '../../assets/splash.png'
 import { useAuth } from '../../src/context/auth/context'
@@ -25,7 +25,6 @@ const Reports = () => {
   const { items = [], refresh = async () => {} } = useQueue() || {}
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState('pending')
-  const { selectedClientRef } = useInspector()
 
   const data = useMemo(() => {
     if (tab === 'pending') {

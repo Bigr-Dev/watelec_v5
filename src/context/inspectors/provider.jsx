@@ -64,21 +64,28 @@ const InspectorProvider = ({ children }) => {
       uri,
     }
 
+    console.log('meter_reading :>> ', meter_reading)
+
     await uploadMeterReading({
       db,
-      clientRef,
+      clientRef: selectedClientRef,
       meter_reading,
       inspectorDispatch,
     })
   }
 
   const handleRetry = async (meter_reading, clientRef) => {
-    await uploadMeterReading({
-      db,
-      clientRef,
-      meter_reading,
-      inspectorDispatch,
-    })
+    try {
+      await uploadMeterReading({
+        db,
+        clientRef,
+        meter_reading,
+        inspectorDispatch,
+      })
+    } catch (error) {
+      console.error('handleRetry failed:', error)
+      throw error // Re-throw to let caller handle it
+    }
   }
 
   return (

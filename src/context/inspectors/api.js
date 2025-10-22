@@ -2,10 +2,6 @@
 import { Alert } from 'react-native'
 import { LIST_METERS_BY_CLIENT_URL, UPLOAD_READING_URL } from '../../config/env'
 import { uriToBase64 } from '../../utils/uriToBase64'
-import { useSQLiteContext } from 'expo-sqlite'
-// ...
-
-//import { logJsHeap, approxBase64Bytes } from '@/src/utils/heapDebug'
 
 import * as actions from './actions'
 //import { approxBase64Bytes, logJsHeap } from '../../utils/heapDebug'
@@ -19,21 +15,6 @@ const cleanText = (s = '') =>
   stripTags(s)
     .trim()
     .replace(/\s{2,}/g, ' ')
-
-const now = new Date()
-// midnight date-only ISO for ReadingDate
-const readingDateISO = new Date(
-  now.getFullYear(),
-  now.getMonth(),
-  now.getDate()
-).toISOString()
-const readingTimeISO = now.toISOString()
-
-// Helper: ensure raw base64 (no data: prefix, no whitespace)
-const toRawBase64 = (s) =>
-  String(s)
-    .replace(/^data:[^;]+;base64,/, '') // drop prefix if present
-    .replace(/\s+/g, '') // remove any whitespace/newlines
 
 // fetch meters
 export const fetchMeters = async ({ selectedClientRef, inspectorDispatch }) => {
@@ -61,13 +42,13 @@ export const fetchMeters = async ({ selectedClientRef, inspectorDispatch }) => {
 
     // inspectorDispatch(actions.fetchMeterDataSuccess(meters))
     return meters
-  } catch {
+  } catch (error) {
     // inspectorDispatch(
     //   actions.fetchMeterDataFailure(
     //     'something went wrong while fetching meters'
     //   )
     // )
-    Alert.alert('Something went wring while fetching meters')
+    Alert.alert('Something went wrong while fetching meters', error)
   } finally {
     clearTimeout(timer)
   }
@@ -160,54 +141,6 @@ export async function getLastLocalReading(
   return best ? { value: best.value, when: best.whenISO, meta: best } : null
 }
 
-// export async function getLastLocalReading(db, { clientRef, meterNumber }) {
-//   const rows = await db.getAllAsync(
-//     `
-//     SELECT
-//       json_extract(payload, '$.MeterNumber') AS MeterNumber,
-//       json_extract(payload, '$.ReadingValue') AS ReadingValue,
-//       json_extract(payload, '$.ReadingDate')  AS ReadingDate,
-//       json_extract(payload, '$.ReadingTime')  AS ReadingTime,
-//       json_extract(payload, '$.ReadingDateTime') AS ReadingDateTime,
-//       created_at
-//     FROM queued_items
-//     WHERE role = 'inspector'
-//       AND kind = 'uploadReading'
-//       AND clientRef = ?
-//       AND json_extract(payload, '$.MeterNumber') = ?
-//       AND IFNULL(status, '') NOT IN ('failed','error')
-//     ORDER BY
-//       COALESCE(
-//         ReadingDateTime,
-//         CASE
-//           WHEN ReadingDate IS NOT NULL AND ReadingTime IS NOT NULL
-//           THEN (ReadingDate || 'T' || ReadingTime)
-//           WHEN ReadingDate IS NOT NULL
-//           THEN (ReadingDate || 'T23:59:59')
-//         END,
-//         datetime(created_at / 1000, 'unixepoch')
-//       ) DESC
-//     LIMIT 1
-//     `,
-//     [clientRef, String(meterNumber)]
-//   )
-
-//   const row = rows?.[0]
-//   if (!row) return null
-
-//   const valueNum = Number(row.ReadingValue)
-//   if (!Number.isFinite(valueNum)) return null
-
-//   return {
-//     value: valueNum,
-//     when:
-//       row.ReadingDateTime ??
-//       (row.ReadingDate && row.ReadingTime
-//         ? `${row.ReadingDate}T${row.ReadingTime}`
-//         : row.ReadingDate ?? null),
-//   }
-// }
-
 // upload meter
 export const uploadMeterReading = async ({
   db,
@@ -249,8 +182,10 @@ export const uploadMeterReading = async ({
     let result
     try {
       result = text ? JSON.parse(text) : {}
+      console.log('result :inspector api>> ', result)
     } catch {
       result = { Message: text }
+      console.log('result :inspector api>> ', result)
     }
 
     //console.log('result :>> ', result)

@@ -22,7 +22,7 @@ const Camera = () => {
 
   const cameraRef = useRef(null)
   const activeRef = useRef(false)
-
+  // console.log('cameraRef :>> ', cameraRef)
   useFocusEffect(
     useCallback(() => {
       activeRef.current = true
@@ -45,8 +45,10 @@ const Camera = () => {
       setUri(photo.uri)
 
       push('/inspector/confirm')
+      setTaking(false)
     } catch (err) {
       Alert.alert('Camera error', String(err?.message || err))
+      setTaking(false)
     } finally {
       setTaking(false)
     }
@@ -68,7 +70,10 @@ const Camera = () => {
         <View style={styles.topBar}>
           <TouchableOpacity
             style={styles.close}
-            onPress={() => replace('/inspector/dashboard')}
+            onPress={() => {
+              setTaking(false)
+              replace('/inspector/dashboard')
+            }}
           >
             <AntDesign name="close-circle" size={32} color="#FFF" />
           </TouchableOpacity>

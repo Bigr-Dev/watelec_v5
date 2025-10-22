@@ -14,6 +14,7 @@ import ScreenLogo from '../../src/components/screen-logo'
 import GradientButton from '../../src/components/GradientButton'
 import { useSQLiteContext } from 'expo-sqlite'
 import { getLastLocalReading } from '../../src/context/inspectors/api'
+import { useEffect } from 'react'
 
 const Dashboard = () => {
   const { replace } = useRouter()
@@ -23,83 +24,76 @@ const Dashboard = () => {
   const {
     ClientReferences,
     inspector: { loading },
-
     selectedClientRef,
     setSelectedClientRef,
     meterOptions,
-
     meterNumber,
     setMeterNumber,
     reading,
     setReading,
   } = useInspector()
-  // const checkData = async () => {
-  //   const clientRef = selectedClientRef
-  //   const data = await getLastLocalReading(db, {
-  //     clientRef,
-  //     meterNumber,
-  //   })
-  //   console.log('data :>> ',await data)
-  //   return data
-  // }
-  // checkData()
 
-  // const openCamera = async () => {
-  //   if (!meterNumber)
-  //     return Alert.alert('Select meter', 'Please select a meter number')
-  //   if (!reading)
-  //     return Alert.alert('Enter reading', 'Please enter the meter reading')
-  //   console.log('test :>> ')
-  //   //replace('/inspector/camera')
-  //   return
-  // }
-
-  const openCamera = async () => {
-    // B) Count how many rows match your expected role/kind
-    const counts = await db.getAllAsync(`
-  SELECT role, kind, clientRef, status, COUNT(*) AS n
-  FROM queued_items
-  GROUP BY role, kind, clientRef, status
-  ORDER BY n DESC
-`)
-    console.log('rows by role/kind/clientRef/status:', counts)
-    // Basic input guards
+  const openCamera = () => {
     if (!meterNumber) {
       return Alert.alert('Select meter', 'Please select a meter number')
     }
-    if (reading == null || String(reading).trim() === '') {
-      return Alert.alert('Enter reading', 'Please enter the meter reading')
-    }
-
-    const currentNum = Number(String(reading).replace(',', '.'))
-    if (!Number.isFinite(currentNum)) {
-      return Alert.alert('Invalid reading', 'Reading must be a number')
-    }
-
-    try {
-      const last = await getLastLocalReading(db, {
-        clientRef: selectedClientRef,
-        meterNumber: String(meterNumber).trim(),
-      })
-      console.log('last :>> ', last)
-      // If a previous reading exists, enforce strictly greater
-      if (last && currentNum <= Number(last.value)) {
-        const when = last.when ? ` on ${last.when}` : ''
-        return Alert.alert(
-          'Reading too low',
-          `This reading (${currentNum}) is not greater than the last recorded value (${last.value}${when}). Please recheck the meter.`
-        )
-      }
-
-      // OK to proceed
-      replace('/inspector/camera')
-    } catch (e) {
-      // Fail open if lookup has an unexpected issue (optional: tighten to fail closed)
-      console.warn('last-reading check failed:', e?.message || e)
-      replace('/inspector/camera')
-    }
+    replace('/inspector/camera')
   }
 
+  //   const openCamera = async () => {
+  //     // B) Count how many rows match your expected role/kind
+  //     const counts = await db.getAllAsync(`
+  //   SELECT role, kind, clientRef, status, COUNT(*) AS n
+  //   FROM queued_items
+  //   GROUP BY role, kind, clientRef, status
+  //   ORDER BY n DESC
+  // `)
+  // console.log('rows by role/kind/clientRef/status:', counts)
+  // // Basic input guards
+  // if (!meterNumber) {
+  //   return Alert.alert('Select meter', 'Please select a meter number')
+  // }
+  // if (reading == null || String(reading).trim() === '') {
+  //   return Alert.alert('Enter reading', 'Please enter the meter reading')
+  // }
+
+  // const currentNum = Number(String(reading).replace(',', '.'))
+  // if (!Number.isFinite(currentNum)) {
+  //   return Alert.alert('Invalid reading', 'Reading must be a number')
+  // }
+
+  //     try {
+  // const last = await getLastLocalReading(db, {
+  //   clientRef: selectedClientRef,
+  //   meterNumber: String(meterNumber).trim(),
+  // })
+  // // console.log('last :>> ', last)
+  // // If a previous reading exists, enforce strictly greater
+  // if (last && currentNum <= Number(last.value)) {
+  //   const when = last.when ? ` on ${last.when}` : ''
+  //   return Alert.alert(
+  //     'Reading too low',
+  //     `This reading (${currentNum}) is not greater than the last recorded value (${last.value}${when}). Please recheck the meter.`
+  //   )
+  // }
+
+  //       // OK to proceed
+  //       replace('/inspector/camera')
+  //     } catch (e) {
+  //       // Fail open if lookup has an unexpected issue (optional: tighten to fail closed)
+  //       console.warn('last-reading check failed:', e?.message || e)
+  //       replace('/inspector/camera')
+  //     }
+  //   }
+
+  // useEffect(() => {
+  //   if (!selectedClientRef) {
+  //     setMeterNumber('')
+  //   }
+  //   setMeterNumber('')
+  // }, [selectedClientRef])
+
+  // console.log('meterNumber :>> ', meterNumber)
   const canSubmit = selectedClientRef && meterNumber ? false : true
   return (
     <ScreenContainer>
@@ -154,14 +148,15 @@ const Dashboard = () => {
             ))}
           </Picker>
         </View>
-        <TextInput
+        {/* <TextInput
           placeholder="Meter Reading"
           style={styles.input}
           keyboardType="numeric"
           value={reading}
           onChangeText={setReading}
           placeholderTextColor={'#333'}
-        />
+        /> */}
+        <View style={{ height: 32 }} />
         <GradientButton
           title="SUBMIT METER READING"
           onPress={openCamera}

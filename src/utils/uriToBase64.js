@@ -85,39 +85,3 @@ export async function uriToBase64(uri) {
     }
   }
 }
-
-// // utils/uriToBase64.js
-// import * as FileSystem from 'expo-file-system'
-// import { Alert } from 'react-native'
-
-// /**
-//  * Convert a local or remote URI to a Base64 string.
-//  * - Supports file://, content:// (Android), and http/https URLs.
-//  * - Uses a temp download for remote URLs and cleans it up afterward.
-//  */
-// export async function uriToBase64(uri) {
-//   if (!uri) throw new Error('uriToBase64: missing uri')
-
-//   // Local files: file:// or content:// (Android)
-//   if (/^(file|content):\/\//i.test(uri)) {
-//     return FileSystem.readAsStringAsync(uri, {
-//       encoding: FileSystem.EncodingType.Base64,
-//     })
-//   }
-
-//   // Remote URLs: download to cache first, then read
-//   if (/^https?:\/\//i.test(uri)) {
-//     const tmp = `${FileSystem.cacheDirectory}u2b_${Date.now()}.bin`
-//     try {
-//       const { uri: downloaded } = await FileSystem.downloadAsync(uri, tmp)
-//       return await FileSystem.readAsStringAsync(downloaded, {
-//         encoding: FileSystem.EncodingType.Base64,
-//       })
-//     } finally {
-//       // best-effort cleanup (ignore errors)
-//       FileSystem.deleteAsync(tmp, { idempotent: true }).catch(() => {})
-//     }
-//   }
-
-//   Alert.alert(`uriToBase64: unsupported URI scheme: ${uri}`)
-// }
