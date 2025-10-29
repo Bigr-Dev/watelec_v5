@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native'
@@ -145,6 +146,7 @@ export default function Confirm() {
 
   const displayDate = (typeof dateISO === 'string' ? dateISO : '')?.slice(0, 10)
   const displayTime = timeISO ? new Date(timeISO).toLocaleTimeString() : ''
+  const canSubmit = newMeterNumber ? false : true
 
   return (
     <ScreenContainer>
@@ -203,15 +205,31 @@ export default function Confirm() {
             <Text>Time: {displayTime || '—'}</Text>
           </View>
 
-          <GradientButton title="Confirm & Upload" onPress={submit} />
+          <Text style={{ marginBottom: 5, marginTop: 12 }}>
+            New Meter Number
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter new meter number"
+            value={newMeterNumber}
+            onChangeText={setNewMeterNumber}
+            keyboardType="number-pad"
+            placeholderTextColor={'#333'}
+          />
+
+          <GradientButton
+            title="Confirm & Upload"
+            disabled={canSubmit}
+            onPress={submit}
+          />
         </View>
 
-        <View style={{ marginTop: 0, marginHorizontal: 24 }}>
+        {/* <View style={{ marginTop: 0, marginHorizontal: 24 }}>
           <GradientButton
             title="Back"
             onPress={() => replace('/installer/camera')}
           />
-        </View>
+        </View> */}
       </View>
     </ScreenContainer>
   )
@@ -230,6 +248,17 @@ const styles = StyleSheet.create({
   },
   label: { color: '#7a8a9a', fontWeight: 'bold' },
   value: { color: '#000', fontWeight: 'bold', fontSize: 16 },
+  input: {
+    backgroundColor: '#eef2f5',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: '#c7d4de',
+    height: 52,
+    color: '#333',
+  },
 })
 
 // // app/installer/confirm.jsx

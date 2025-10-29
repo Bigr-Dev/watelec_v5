@@ -22,15 +22,15 @@ const Dashboard = () => {
   } = useInstaller()
 
   const openCamera = () => {
-    if (!newMeterNumber)
-      return Alert.alert(
-        'New meter number missing',
-        'Please enter a meter number'
-      )
+    // if (!newMeterNumber)
+    //   return Alert.alert(
+    //     'New meter number missing',
+    //     'Please enter a meter number'
+    //   )
     push('/installer/camera')
   }
 
-  const canSubmit = selectedClientRef && newMeterNumber ? false : true
+  const canSubmit = selectedClientRef ? false : true
   return (
     <ScreenContainer>
       <ScreenLogo />
@@ -55,7 +55,7 @@ const Dashboard = () => {
             ))}
           </Picker>
         </View>
-        <Text style={{ marginBottom: 5 }}>New Meter Number</Text>
+        {/* <Text style={{ marginBottom: 5 }}>New Meter Number</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter new meter number"
@@ -63,7 +63,7 @@ const Dashboard = () => {
           onChangeText={setNewMeterNumber}
           keyboardType="number-pad"
           placeholderTextColor={'#333'}
-        />
+        /> */}
         <GradientButton
           title="SUBMIT METER READING"
           onPress={openCamera}
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     borderColor: '#BFD5E1',
     borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 12,
+    marginBottom: 60,
     backgroundColor: '#fff',
     // maxWidth: '80%',
   },

@@ -5,6 +5,7 @@
     "scheme": "watelec",
     "version": "1.0.0",
     "orientation": "portrait",
+    "assetBundlePatterns": ["**/*"],
     "icon": "./assets/icon-1024.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -14,45 +15,28 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
       "bundleIdentifier": "za.co.watelec.app",
+      "supportsTablet": true,
+
       "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to take photos.",
         "NSPhotoLibraryAddUsageDescription": "We save captured or selected photos to your library."
       }
     },
     "android": {
+      "package": "za.co.watelec.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#222629"
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
+        "CAMERA",
         "READ_MEDIA_IMAGES",
-        "ACCESS_MEDIA_LOCATION",
-        "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
-        "READ_MEDIA_VISUAL_USER_SELECTED",
-        "READ_MEDIA_AUDIO",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
-        "android.permission.ACCESS_MEDIA_LOCATION",
-        "android.permission.READ_MEDIA_AUDIO",
-        "android.permission.READ_MEDIA_IMAGES",
-        "READ_MEDIA_IMAGES",
-        "ACCESS_MEDIA_LOCATION",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "READ_MEDIA_VISUAL_USER_SELECTED",
-        "READ_MEDIA_AUDIO",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
-        "android.permission.ACCESS_MEDIA_LOCATION",
-        "android.permission.READ_MEDIA_AUDIO",
-        "android.permission.READ_MEDIA_IMAGES"
-      ],
-      "package": "za.co.watelec.app"
+        "ACCESS_MEDIA_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -64,7 +48,7 @@
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
           "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
           "isAccessMediaLocationEnabled": true,
-          "granularPermissions": ["audio", "photo"]
+          "granularPermissions": ["photo"]
         }
       ],
       "expo-sqlite",

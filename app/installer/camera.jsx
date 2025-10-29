@@ -56,6 +56,7 @@ const Camera = () => {
       if (pic_count >= 2) {
         push('/installer/confirm')
       }
+      setTaking(false)
     } catch (error) {
       Alert.alert('Camera error', String(err?.message || err))
     } finally {

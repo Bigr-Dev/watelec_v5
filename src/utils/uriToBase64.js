@@ -34,49 +34,30 @@ export async function uriToBase64(uri) {
     }
 
     // --- Size-aware encode ---
-    // Start fairly compact; adjust if your server allows larger payloads.
     const START_WIDTH = 1280
-    const MIN_WIDTH = 640
-    const START_QUALITY = 0.75
-    const MIN_QUALITY = 0.5
-    const MAX_BYTES = 700_000 // cap base64 payload ~<= 700 KB (tune as needed)
+    const MIN_QUALITY = 0.7 // Increased minimum quality to prevent corruption
+    const MAX_BYTES = 1_000_000 // Increased size limit
 
-    let width = START_WIDTH
-    let quality = START_QUALITY
-
-    while (true) {
-      const res = await ImageManipulator.manipulateAsync(
-        workUri,
-        width ? [{ resize: { width } }] : [],
-        {
-          compress: quality,
-          format: ImageManipulator.SaveFormat.JPEG,
-          base64: true,
-        }
-      )
-
-      if (!res.base64) throw new Error('uriToBase64: failed to produce base64')
-
-      // base64 size estimate: ~3/4 of string length
-      const approxBytes = Math.ceil((res.base64.length * 3) / 4)
-      if (approxBytes <= MAX_BYTES) {
-        return res.base64 // no prefix
+    // Single-pass compression with safer settings
+    const res = await ImageManipulator.manipulateAsync(
+      workUri,
+      [{ resize: { width: START_WIDTH } }],
+      {
+        compress: MIN_QUALITY,
+        format: ImageManipulator.SaveFormat.JPEG,
+        base64: true,
       }
+    )
 
-      // Too big: reduce quality first, then width
-      if (quality > MIN_QUALITY + 0.05) {
-        quality = Math.max(MIN_QUALITY, quality - 0.1)
-        continue
-      }
-      if (width > MIN_WIDTH) {
-        width = Math.max(MIN_WIDTH, Math.floor(width * 0.8))
-        quality = START_QUALITY // reset quality when dropping width
-        continue
-      }
-
-      // Can't shrink further—return best effort
-      return res.base64
+    if (!res.base64) throw new Error('uriToBase64: failed to produce base64')
+    
+    // Validate base64 is complete (should end with proper padding)
+    const base64 = res.base64.trim()
+    if (base64.length === 0) {
+      throw new Error('uriToBase64: empty base64 result')
     }
+
+    return base64
   } finally {
     if (downloadedTmp) {
       try {
